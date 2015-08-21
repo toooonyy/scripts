@@ -1,13 +1,12 @@
 set nocompatible
 filetype off
 
-set rtp+=~/.vim/bundle/vundle/
-call vundle#rc()
-Bundle 'gmarik/vundle'
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
 Plugin 'davidhalter/jedi-vim'
 Plugin 'Solarized'
 Plugin 'darkerdesert'
-Plugin 'Indent-Guides'
 call vundle#end() 
 filetype plugin indent on
 
@@ -32,7 +31,7 @@ set noswapfile
 set background=dark
 colorscheme darkerdesert
 
-let g:jedi#completions_command = "<C-N>"
+let g:jedi#completions_command = "<C-N>" 
 
 autocmd BufNewFile *.py exec ":call SetTitle()"
 func SetTitle() 
@@ -41,3 +40,4 @@ func SetTitle()
         call setline(2,"# -* - coding: UTF-8 -* -")
     endif
 endfunc
+
