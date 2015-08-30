@@ -27,6 +27,6 @@ def convert(file_in,file_out):
 
 
 if __name__ == '__main__':
-    srcDir=os.getcwd()+'/'+sys.argv[1]
-    dstDir=os.getcwd()+'/'+sys.argv[2]
+    srcDir=sys.argv[1]
+    dstDir=sys.argv[2]
 search(srcDir,dstDir,convert)
