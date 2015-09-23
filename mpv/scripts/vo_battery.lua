@@ -1,6 +1,6 @@
 -- If the laptop is on battery, the VO set in the config will be choosen,
 -- else the one defined with "hqvo" is used.
-local hqvo = "opengl-hq:interpolation:swapinterval=1:scaler-resizes-only:scale=spline36:scale-radius=3:scale-antiring=0.7:dscale=mitchell:cscale=spline36:cscale-radius=3:tscale=oversample:dither-depth=8:fbo-format=rgb16f:linear-scaling:icc-profile-auto"
+local hqvo = "opengl:scaler-resizes-only:scale=spline36:dscale=mitchell:cscale=spline36:dither-depth=8:fbo-format=rgb16f:fancy-downscaling:linear-scaling:pbo:deband:icc-profile-auto"
 
 local utils = require 'mp.utils'
 if mp.get_property_bool("option-info/vo/set-from-commandline") == true then
