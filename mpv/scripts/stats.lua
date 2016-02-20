@@ -19,7 +19,7 @@ local o = {
 
     -- Text style
     font = "Source Sans Pro",
-    font_size = 11,
+    font_size = 10,
     font_color = "FFFFFF",
     border_size = 1.0,
     border_color = "262626",
@@ -142,6 +142,7 @@ function add_video(s)
     append_property(s, sec, "video-params/pixelformat", {prefix="Pixel format:"})
     append_property(s, sec, "video-params/colormatrix", {prefix="Colormatrix:"})
     append_property(s, sec, "video-params/primaries", {prefix="Primaries:"})
+    append_property(s, sec, "video-params/gamma", {prefix="Gamma:"})
     append_property(s, sec, "video-params/colorlevels", {prefix="Levels:"})
     append_property(s, sec, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
 end
