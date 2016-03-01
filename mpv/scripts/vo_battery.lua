@@ -2,7 +2,6 @@
 -- else the one defined with "hqvo" is used.
 local hqvo = "opengl:scaler-resizes-only:scale=spline36:dscale=mitchell:cscale=spline36:dither-depth=8:correct-downscaling:linear-scaling:pbo:icc-profile-auto"
 local utils = require 'mp.utils'
-local vsync = "display-resample"
 if mp.get_property_bool("option-info/vo/set-from-commandline") == true then
     return
 end
@@ -11,5 +10,4 @@ t.args = {"/usr/bin/pmset", "-g", "ac"}
 res = utils.subprocess(t)
 if res.stdout ~= "No adapter attached.\n" then
     mp.set_property("options/vo",hqvo)
-    mp.set_property("options/video-sync", vsync)
 end
