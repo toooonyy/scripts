@@ -1,6 +1,6 @@
 -- If the laptop is on battery, the VO set in the config will be choosen,
 -- else the one defined with "hqvo" is used.
-local hqvo = "opengl:scaler-resizes-only:scale=spline36:dscale=mitchell:cscale=spline36:dither-depth=8:correct-downscaling:linear-scaling:pbo:icc-profile-auto"
+local hqvo = "opengl:scaler-resizes-only:scale=spline36:dscale=mitchell:cscale=spline36:dither-depth=8:correct-downscaling:linear-scaling:pbo:icc-profile-auto:blend-subtitles=video"
 local utils = require 'mp.utils'
 if mp.get_property_bool("option-info/vo/set-from-commandline") == true then
     return
