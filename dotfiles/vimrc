@@ -38,7 +38,7 @@ let g:jedi#completions_command = "<C-N>"
 autocmd BufNewFile *.py exec ":call SetTitle()"
 func SetTitle() 
     if &filetype == "python"
-        call setline(1,"#!/usr/bin/env python")
+        call setline(1,"#!/usr/bin/env python3")
         call setline(2,"# -* - coding: UTF-8 -* -")
     endif
 endfunc
