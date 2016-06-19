@@ -154,7 +154,7 @@ function add_video(s)
     end
     append_property(s, sec, "window-scale", {prefix="Window Scale:"})
     append_property(s, sec, "video-params/aspect", {prefix="Aspect Ratio:"})
-    append_property(s, sec, "video-params/pixelformat", {prefix="Pixel format:"})
+    append_property(s, sec, "video-params/pixelformat", {prefix="Pixel Format:"})
     append_property(s, sec, "video-params/colormatrix", {prefix="Colormatrix:"})
     append_property(s, sec, "video-params/primaries", {prefix="Primaries:"})
     append_property(s, sec, "video-params/gamma", {prefix="Gamma:"})
@@ -288,7 +288,7 @@ function b(t)
 end
 
 
-local timer = mp.add_periodic_timer(o.redraw_delay - 0.1, function() print_stats(o.redraw_delay) end)
+local timer = mp.add_periodic_timer(o.redraw_delay, function() print_stats(o.redraw_delay + 1) end)
 timer:kill()
 
 function toggle_stats()
@@ -297,7 +297,7 @@ function toggle_stats()
         mp.osd_message("", 0)
     else
         timer:resume()
-        print_stats(o.redraw_delay)
+        print_stats(o.redraw_delay + 1)
     end
 end
 
