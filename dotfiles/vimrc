@@ -12,7 +12,7 @@ filetype plugin indent on
 
 syntax enable
 
-set mouse=a
+set mouse=v
 
 set tabstop=8
 set expandtab
