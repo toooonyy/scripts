@@ -17,8 +17,10 @@ local o = {
 
     duration = 3,
     redraw_delay = 1,                -- acts as duration in the toggling case
-    timing_warning = true,
     ass_formatting = true,
+    timing_warning = true,
+    timing_warning_th = 0.85,        -- *no* warning threshold (warning when > dfps * timing_warning_th)
+    timing_total = false,
     debug = false,
 
     -- Graph options and style
@@ -159,8 +161,8 @@ local function generate_graph(values, v_max, scale)
 
     local bg_box = format("{\\bord0.5}{\\3c&H%s&}{\\1c&H%s&}m 0 %f l %f %f %f 0 0 0",
                           o.plot_bg_border_color, o.plot_bg_color, y_max, x_max, y_max, x_max)
-    return format("\\h\\h\\h{\\r}{\\pbo%f}{\\shad0}{\\alpha&H00}{\\p1}%s{\\p0}{\\bord0}{\\1c&H%s}{\\p1}%s{\\p0}{\\r}%s",
-                  y_offset, bg_box, o.plot_color, table.concat(s), text_style())
+    return format("%s{\\r}{\\pbo%f}{\\shad0}{\\alpha&H00}{\\p1}%s{\\p0}{\\bord0}{\\1c&H%s}{\\p1}%s{\\p0}{\\r}%s",
+                  o.prefix_sep, y_offset, bg_box, o.plot_color, table.concat(s), text_style())
 end
 
 
@@ -178,10 +180,16 @@ local function append_perfdata(s)
     local peak_s = vo_p["render-peak"] + vo_p["present-peak"] + vo_p["upload-peak"]
 
     -- highlight i with a red border when t exceeds the time for one frame
+    -- or yellow when it exceeds a given threshold
     local function hl(i, t)
-        if o.timing_warning and t > dfps and dfps > 0 then
-            return format("{\\bord0.5}{\\3c&H0000FF&}%05d{\\bord%s}{\\3c&H%s&}",
-                            i, o.border_size, o.border_color)
+        if o.timing_warning and dfps > 0 then
+            if t > dfps then
+                return format("{\\bord0.5}{\\3c&H0000FF&}%05d{\\bord%s}{\\3c&H%s&}",
+                                i, o.border_size, o.border_color)
+            elseif t > (dfps * o.timing_warning_th) then
+                return format("{\\bord0.5}{\\1c&H00DDDD&}%05d{\\bord%s}{\\1c&H%s&}",
+                                i, o.border_size, o.font_color)
+            end
         end
         return format("%05d", i)
     end
@@ -189,7 +197,7 @@ local function append_perfdata(s)
 
     local rsuffix, psuffix, usuffix
 
-    if o.plot_graphs and timer:is_enabled() then
+    if o.plot_graphs and o.ass_formatting and timer:is_enabled() then
         local max = {1, 1, 1}
         for e = 1, plen do
             if plast[1][e] and plast[1][e] > max[1] then max[1] = plast[1][e] end
@@ -206,16 +214,16 @@ local function append_perfdata(s)
         usuffix = generate_graph(plast[3], max[3], 0.8)
 
         s[#s+1] = format("%s%s%s%s{\\fs%s}%s%s%s{\\fs%s}", o.nl, o.indent,
-                         b("Timings:"), o.prefix_sep, o.font_size * 0.66,
+                         b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
                          "Render  ⏎  Present  ⏎  Upload", o.prefix_sep,
                          "(last/average/peak  μs)", o.font_size)
     else
-        rsuffix = "Render"
-        psuffix = "Present"
-        usuffix = "Upload"
+        rsuffix = o.prefix_sep .. "Render"
+        psuffix = o.prefix_sep .. "Present"
+        usuffix = o.prefix_sep .. "Upload"
 
         s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}", o.nl, o.indent,
-                         b("Timings:"), o.prefix_sep, o.font_size * 0.66,
+                         b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
                          "(last/average/peak  μs)", o.font_size)
     end
 
@@ -229,6 +237,11 @@ local function append_perfdata(s)
     s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                     hl(vo_p["upload-last"], last_s), hl(vo_p["upload-avg"], avg_s),
                     hl(vo_p["upload-peak"], peak_s), o.font, o.prefix_sep, usuffix)
+    if o.timing_total then
+        s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
+                        hl(last_s, last_s), hl(avg_s, avg_s),
+                        hl(peak_s, peak_s), o.font, o.prefix_sep, o.prefix_sep .. "Total")
+    end
 end
 
 
@@ -327,7 +340,7 @@ local function add_video(s)
         append_property(s, "estimated-vf-fps",
                         {prefix="FPS:", suffix=" (estimated)"})
     end
-    if append_property(s, "video-speed-correction", {prefix="DS:"}) then
+    if append_property(s, "video-speed-correction", {prefix="DS:"}, {["+0.00000%"]=true}) then
         append_property(s, "audio-speed-correction",
                         {prefix="/", nl="", indent=" ", prefix_sep=" ", no_prefix_markup=true})
     end
@@ -341,10 +354,21 @@ local function add_video(s)
     append_property(s, "window-scale", {prefix="Window Scale:"})
     append_property(s, "video-params/aspect", {prefix="Aspect Ratio:"})
     append_property(s, "video-params/pixelformat", {prefix="Pixel Format:"})
-    append_property(s, "video-params/colormatrix", {prefix="Colormatrix:"})
-    append_property(s, "video-params/primaries", {prefix="Primaries:"})
-    append_property(s, "video-params/gamma", {prefix="Gamma:"})
-    append_property(s, "video-params/colorlevels", {prefix="Levels:"})
+
+    -- Group these together to save vertical space
+    local prim = append_property(s, "video-params/primaries", {prefix="Primaries:"})
+    local cmat = append_property(s, "video-params/colormatrix",
+                                 {prefix="Colormatrix:", nl=prim and "" or o.nl})
+    append_property(s, "video-params/colorlevels", {prefix="Levels:", nl=cmat and "" or o.nl})
+
+    -- Append HDR metadata conditionally (only when present and interesting)
+    local hdrpeak = mp.get_property_number("video-params/sig-peak", 0)
+    local hdrinfo = ""
+    if hdrpeak > 0 then
+        hdrinfo = " (HDR peak: " .. hdrpeak .. " cd/m²)"
+    end
+
+    append_property(s, "video-params/gamma", {prefix="Gamma:", suffix=hdrinfo})
     append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
 end
 
