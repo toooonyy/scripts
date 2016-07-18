@@ -1,18 +1,36 @@
-set nocompatible
-filetype off
+set nocompatible              " be iMproved, required
+filetype off                  " required
 
+
+" set the runtime path to include Vundle and initialize
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
+
 Plugin 'VundleVim/Vundle.vim'
 Plugin 'davidhalter/jedi-vim'
+Plugin 'nathanaelkane/vim-indent-guides'
+Plugin 'scrooloose/syntastic'
 Plugin 'Solarized'
 Plugin 'darkerdesert'
-call vundle#end() 
-filetype plugin indent on
+
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+filetype plugin indent on    " required
 
 syntax enable
+let python_highlight_all = 1
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
 
-set mouse=v
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+
+let g:syntastic_python_checkers=['flake8']
+
+set mouse=a
 
 set tabstop=8
 set expandtab
@@ -34,6 +52,7 @@ set background=dark
 colorscheme darkerdesert
 
 let g:jedi#completions_command = "<C-N>" 
+let g:indent_guides_enable_on_vim_startup = 1
 
 autocmd BufNewFile *.py exec ":call SetTitle()"
 func SetTitle() 
