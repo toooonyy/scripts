@@ -19,6 +19,7 @@ filetype plugin indent on    " required
 
 syntax enable
 let python_highlight_all = 1
+
 set statusline+=%#warningmsg#
 set statusline+=%{SyntasticStatuslineFlag()}
 set statusline+=%*
@@ -27,8 +28,11 @@ let g:syntastic_always_populate_loc_list = 1
 let g:syntastic_auto_loc_list = 1
 let g:syntastic_check_on_open = 1
 let g:syntastic_check_on_wq = 0
-
 let g:syntastic_python_checkers=['flake8']
+
+let g:jedi#completions_command = "<C-N>" 
+
+let g:indent_guides_enable_on_vim_startup = 1
 
 set mouse=a
 
@@ -51,9 +55,6 @@ set noswapfile
 set background=dark
 colorscheme darkerdesert
 
-let g:jedi#completions_command = "<C-N>" 
-let g:indent_guides_enable_on_vim_startup = 1
-
 autocmd BufNewFile *.py exec ":call SetTitle()"
 func SetTitle() 
     if &filetype == "python"
@@ -61,4 +62,3 @@ func SetTitle()
         call setline(2,"# -* - coding: UTF-8 -* -")
     endif
 endfunc
-
