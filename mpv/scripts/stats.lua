@@ -19,7 +19,7 @@ local o = {
     redraw_delay = 1,                -- acts as duration in the toggling case
     ass_formatting = true,
     timing_warning = true,
-    timing_warning_th = 0.85,        -- *no* warning threshold (warning when > dfps * timing_warning_th)
+    timing_warning_th = 0.85,        -- *no* warning threshold (warning when > target_fps * timing_warning_th)
     timing_total = false,
     debug = false,
 
@@ -65,19 +65,26 @@ local o = {
 options.read_options(o)
 
 local format = string.format
+-- Buffer for the "last" value of performance data for render/present/upload
 local plast = {{0}, {0}, {0}}
+-- Position in buffer
 local ppos = 1
+-- Length of buffer
 local plen = 50
+-- Function used to record performance data
 local recorder = nil
-local timer
-
+-- Timer used for toggling
+local timer = nil
+-- Save these sequences locally as we'll need them a lot
+local ass_start = mp.get_property_osd("osd-ass-cc/0")
+local ass_stop = mp.get_property_osd("osd-ass-cc/1")
 
 
 local function set_ASS(b)
     if not o.ass_formatting then
         return ""
     end
-    return mp.get_property_osd("osd-ass-cc/" .. (b and "0" or "1"))
+    return b and ass_start or ass_stop
 end
 
 
@@ -172,8 +179,9 @@ local function append_perfdata(s)
         return
     end
 
-    local dfps = mp.get_property_number("display-fps", 0)
-    dfps = dfps > 0 and (1 / dfps * 1e6)
+    local ds = mp.get_property_bool("display-sync-active", false)
+    local target_fps = ds and mp.get_property_number("display-fps", 0) or mp.get_property_number("fps", 0)
+    if target_fps > 0 then target_fps = 1 / target_fps * 1e6 end
 
     local last_s = vo_p["render-last"] + vo_p["present-last"] + vo_p["upload-last"]
     local avg_s = vo_p["render-avg"] + vo_p["present-avg"] + vo_p["upload-avg"]
@@ -182,11 +190,11 @@ local function append_perfdata(s)
     -- highlight i with a red border when t exceeds the time for one frame
     -- or yellow when it exceeds a given threshold
     local function hl(i, t)
-        if o.timing_warning and dfps > 0 then
-            if t > dfps then
+        if o.timing_warning and target_fps > 0 then
+            if t > target_fps then
                 return format("{\\bord0.5}{\\3c&H0000FF&}%05d{\\bord%s}{\\3c&H%s&}",
                                 i, o.border_size, o.border_color)
-            elseif t > (dfps * o.timing_warning_th) then
+            elseif t > (target_fps * o.timing_warning_th) then
                 return format("{\\bord0.5}{\\1c&H00DDDD&}%05d{\\bord%s}{\\1c&H%s&}",
                                 i, o.border_size, o.font_color)
             end
@@ -230,13 +238,13 @@ local function append_perfdata(s)
     local f = "%s%s%s{\\fn%s}%s / %s / %s{\\fn%s}%s%s"
     s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                     hl(vo_p["render-last"], last_s), hl(vo_p["render-avg"], avg_s),
-                    hl(vo_p["render-peak"], peak_s), o.font, o.prefix_sep, rsuffix)
+                    hl(vo_p["render-peak"], -math.huge), o.font, o.prefix_sep, rsuffix)
     s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                     hl(vo_p["present-last"], last_s), hl(vo_p["present-avg"], avg_s),
-                    hl(vo_p["present-peak"], peak_s), o.font, o.prefix_sep, psuffix)
+                    hl(vo_p["present-peak"], -math.huge), o.font, o.prefix_sep, psuffix)
     s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                     hl(vo_p["upload-last"], last_s), hl(vo_p["upload-avg"], avg_s),
-                    hl(vo_p["upload-peak"], peak_s), o.font, o.prefix_sep, usuffix)
+                    hl(vo_p["upload-peak"], -math.huge), o.font, o.prefix_sep, usuffix)
     if o.timing_total then
         s[#s+1] = format(f, o.nl, o.indent, o.indent, o.font_mono,
                         hl(last_s, last_s), hl(avg_s, avg_s),
@@ -250,13 +258,13 @@ end
 -- is skipped and not appended.
 -- Returns `false` in case nothing was appended, otherwise `true`.
 --
--- s       : Table containing strings.
--- property: The property to query and format (based on its OSD representation).
--- attr    : Optional table to overwrite certain (formatting) attributes for
---           this property.
--- exclude : Optional table containing keys which are considered invalid values
---           for this property. Specifying this will replace empty string as
---           default invalid value (nil is always invalid).
+-- s      : Table containing strings.
+-- prop   : The property to query and format (based on its OSD representation).
+-- attr   : Optional table to overwrite certain (formatting) attributes for
+--          this property.
+-- exclude: Optional table containing keys which are considered invalid values
+--          for this property. Specifying this will replace empty string as
+--          default invalid value (nil is always invalid).
 local function append_property(s, prop, attr, excluded)
     excluded = excluded or {[""] = true}
     local ret = mp.get_property_osd(prop)
