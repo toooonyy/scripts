@@ -29,4 +29,4 @@ table_list = [[x, get_ip_from_ipcn(x), get_ip_from_ipipnet(x)] for x in ip_addre
 max_wide = max([len(x) for x in list(itertools.chain(*table_list))]) + 1
 
 for row in table_list:
-    print ("{:<{width}}{:<{width}}{:<{width}}".format(*row, width=max_wide))
+    print("{:<{width}}{:<{width}}{:<{width}}".format(*row, width=max_wide))
