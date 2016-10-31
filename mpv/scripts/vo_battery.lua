@@ -13,5 +13,4 @@ if res.stdout ~= "No adapter attached.\n" then
     mp.set_property("temporal-dither","yes")
     mp.set_property("correct-downscaling","yes")
     mp.set_property("linear-scaling","yes")
-    mp.set_property("opengl-pbo","yes")
 end
