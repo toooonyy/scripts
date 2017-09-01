@@ -24,6 +24,7 @@ local o = {
     timing_warning = true,
     timing_warning_th = 0.85,        -- *no* warning threshold (warning when > target_fps * timing_warning_th)
     print_perfdata_passes = false,   -- when true, print the full information about all passes
+    filter_params_max_length = 100,  -- a filter list longer than this many characters will be shown one filter per line instead
     debug = false,
 
     -- Graph options and style
@@ -40,7 +41,7 @@ local o = {
     -- Text style
     font = "Source Sans Pro",
     font_mono = "Source Sans Pro",   -- monospaced digits are sufficient
-    font_size = 9,
+    font_size = 8,
     font_color = "FFFFFF",
     border_size = 0.8,
     border_color = "262626",
@@ -61,12 +62,16 @@ local o = {
     ass_prefix_sep = "\\h\\h",
     ass_b1 = "{\\b1}",
     ass_b0 = "{\\b0}",
+    ass_it1 = "{\\i1}",
+    ass_it0 = "{\\i0}",
     -- Without ASS
     no_ass_nl = "\n",
     no_ass_indent = "\t",
     no_ass_prefix_sep = " ",
     no_ass_b1 = "\027[1m",
     no_ass_b0 = "\027[0m",
+    no_ass_it1 = "\027[3m",
+    no_ass_it0 = "\027[0m",
 }
 options.read_options(o)
 
@@ -132,6 +137,11 @@ end
 
 local function b(t)
     return o.b1 .. t .. o.b0
+end
+
+
+local function it(t)
+    return o.it1 .. t .. o.it0
 end
 
 
@@ -317,9 +327,8 @@ local function append_perfdata(s, dedicated_page)
         return format("{\\b%d}%02d%%{\\b0}", w, i * 100)
     end
 
-    local title = "Frame Timings" .. (mp.get_property_bool("vd-lavc-dr", false) and " (DR):" or ":")
     s[#s+1] = format("%s%s%s%s{\\fs%s}%s{\\fs%s}", dedicated_page and "" or o.nl, dedicated_page and "" or o.indent,
-                     b(title), o.prefix_sep, o.font_size * 0.66,
+                     b("Frame Timings:"), o.prefix_sep, o.font_size * 0.66,
                      "(last/average/peak  μs)", o.font_size)
 
     for frame, data in pairs(vo_p) do
@@ -373,6 +382,9 @@ local function append_display_sync(s)
                         {prefix="DS:" .. o.prefix_sep .. " - / ", prefix_sep=""})
     end
 
+    append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
+    append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl=""})
+
     -- As we need to plot some graphs we print jitter and ratio on their own lines
     if toggle_timer:is_enabled() and (o.plot_vsync_ratio or o.plot_vsync_jitter) and o.use_ass then
         local ratio_graph = ""
@@ -393,6 +405,43 @@ local function append_display_sync(s)
 end
 
 
+local function append_filters(s, prop, prefix)
+    local length = 0
+    local filters = {}
+
+    for _,f in ipairs(mp.get_property_native(prop, {})) do
+        local n = f.name
+        if f.enabled ~= nil and not f.enabled then
+            n = n .. " (disabled)"
+        end
+
+        local p = {}
+        for key,value in pairs(f.params) do
+            p[#p+1] = key .. "=" .. value
+        end
+        if #p > 0 then
+            p = " [" .. table.concat(p, " ") .. "]"
+        else
+            p = ""
+        end
+
+        length = length + n:len() + p:len()
+        filters[#filters+1] = no_ASS(n) .. it(no_ASS(p))
+    end
+
+    if #filters > 0 then
+        local ret
+        if length < o.filter_params_max_length then
+            ret = table.concat(filters, ", ")
+        else
+            local sep = o.nl .. o.indent .. o.indent
+            ret = sep .. table.concat(filters, sep)
+        end
+        s[#s+1] = o.nl .. o.indent .. b(prefix) .. o.prefix_sep .. ret
+    end
+end
+
+
 local function add_header(s)
     s[#s+1] = text_style()
 end
@@ -403,7 +452,14 @@ local function add_file(s)
     if not (mp.get_property_osd("filename") == mp.get_property_osd("media-title")) then
         append_property(s, "media-title", {prefix="Title:"})
     end
-    append_property(s, "chapter", {prefix="Chapter:"})
+
+    local ch_index = mp.get_property_number("chapter")
+    if ch_index and ch_index >= 0 then
+        append_property(s, "chapter-list/" .. tostring(ch_index) .. "/title", {prefix="Chapter:"})
+        append_property(s, "chapter-list/count",
+                        {prefix="(" .. tostring(ch_index + 1) .. "/", suffix=")", nl="",
+                         indent=" ", prefix_sep=" ", no_prefix_markup=true})
+    end
     if append_property(s, "cache-used", {prefix="Cache:"}) then
         append_property(s, "demuxer-cache-duration",
                         {prefix="+", suffix=" sec", nl="", indent=o.prefix_sep,
@@ -427,10 +483,8 @@ local function add_video(s)
                         {no=true, [""]=true})
     end
     append_property(s, "avsync", {prefix="A-V:"})
-    if append_property(s, compat("decoder-frame-drop-count"), {prefix="Dropped:"}) then
-        append_property(s, compat("frame-drop-count"), {prefix="VO:", nl=""})
-        append_property(s, "mistimed-frame-count", {prefix="Mistimed:", nl=""})
-        append_property(s, "vo-delayed-frame-count", {prefix="Delayed:", nl=""})
+    if append_property(s, compat("decoder-frame-drop-count"), {prefix="Dropped Frames:", suffix=" (decoder)"}) then
+        append_property(s, compat("frame-drop-count"), {suffix=" (output)", nl="", indent=""})
     end
     if append_property(s, "display-fps", {prefix="Display FPS:", suffix=" (specified)"}) then
         append_property(s, "estimated-display-fps",
@@ -473,6 +527,7 @@ local function add_video(s)
 
     append_property(s, "video-params/gamma", {prefix="Gamma:", suffix=hdrinfo})
     append_property(s, "packet-video-bitrate", {prefix="Bitrate:", suffix=" kbps"})
+    append_filters(s, "vf", "Filters:")
 end
 
 
@@ -485,6 +540,7 @@ local function add_audio(s)
     append_property(s, "audio-params/samplerate", {prefix="Sample Rate:", suffix=" Hz"})
     append_property(s, "audio-params/channel-count", {prefix="Channels:"})
     append_property(s, "packet-audio-bitrate", {prefix="Bitrate:", suffix=" kbps"})
+    append_filters(s, "af", "Filters:")
 end
 
 
@@ -497,6 +553,8 @@ local function eval_ass_formatting()
         o.prefix_sep = o.ass_prefix_sep
         o.b1 = o.ass_b1
         o.b0 = o.ass_b0
+        o.it1 = o.ass_it1
+        o.it0 = o.ass_it0
     else
         o.nl = o.no_ass_nl
         o.indent = o.no_ass_indent
@@ -504,9 +562,13 @@ local function eval_ass_formatting()
         if not has_ansi() then
             o.b1 = ""
             o.b0 = ""
+            o.it1 = ""
+            o.it0 = ""
         else
             o.b1 = o.no_ass_b1
             o.b0 = o.no_ass_b0
+            o.it1 = o.no_ass_it1
+            o.it0 = o.no_ass_it0
         end
     end
 end
