@@ -1,21 +1,12 @@
-filetype off                  " required
+call plug#begin('~/.vim/plugged')
 
-" set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+Plug 'davidhalter/jedi-vim'
+Plug 'Yggdroot/indentLine'
+Plug 'w0rp/ale'
+Plug 'lifepillar/vim-solarized8'
 
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'davidhalter/jedi-vim'
-Plugin 'Yggdroot/indentLine'
-Plugin 'w0rp/ale'
-Plugin 'Solarized'
-Plugin 'darkerdesert'
+call plug#end()
 
-" All of your Plugins must be added before the following line
-call vundle#end()            " required
-filetype plugin indent on    " required
-
-syntax enable
 let python_highlight_all = 1
 
 let g:jedi#completions_command = "<C-N>" 
@@ -45,7 +36,7 @@ set nowb
 set noswapfile
 
 set background=dark
-colorscheme darkerdesert
+colorscheme solarized8_flat
 
 autocmd BufNewFile *.py exec ":call SetTitle()"
 func SetTitle() 
