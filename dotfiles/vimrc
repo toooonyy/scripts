@@ -10,6 +10,7 @@ call plug#end()
 "Global
 set encoding=utf8
 syntax on
+filetype plugin indent on
 
 " UI
 set background=dark
@@ -18,6 +19,7 @@ colorscheme solarized8_flat
 set showmatch
 set ruler 
 set number
+set showcmd
 set hlsearch
 
 "Spaceing and Indent
