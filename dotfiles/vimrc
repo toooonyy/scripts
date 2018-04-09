@@ -20,7 +20,11 @@ set showmatch
 set ruler 
 set number
 set showcmd
+
+"Search
 set hlsearch
+set ignorecase
+set smartcase
 
 "Spaceing and Indent
 set tabstop=4
