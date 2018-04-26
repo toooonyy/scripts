@@ -15,6 +15,7 @@ filetype plugin indent on
 " UI
 set background=dark
 colorscheme solarized8_flat
+set termguicolors
 
 set showmatch
 set ruler 
