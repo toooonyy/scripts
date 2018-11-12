@@ -12,5 +12,6 @@ if res.stdout ~= "No adapter attached.\n" then
     mp.set_property("scale","spline36")
     mp.set_property("temporal-dither","yes")
     mp.set_property("correct-downscaling","yes")
+    mp.set_property("linear-downscaling","yes")
     mp.set_property("sigmoid-upscaling","yes")
 end
