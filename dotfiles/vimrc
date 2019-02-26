@@ -12,9 +12,9 @@ set encoding=utf8
 syntax on
 filetype plugin indent on
 
-" UI
+"UI
 set background=dark
-colorscheme solarized8_flat
+colorscheme solarized8_high
 set termguicolors
 
 set showmatch
