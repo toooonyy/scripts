@@ -20,6 +20,7 @@ set termguicolors
 set showmatch
 set ruler 
 set number
+set relativenumber
 set showcmd
 
 "Search
