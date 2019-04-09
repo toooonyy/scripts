@@ -4,6 +4,7 @@ Plug 'davidhalter/jedi-vim'
 Plug 'Yggdroot/indentLine'
 Plug 'w0rp/ale'
 Plug 'lifepillar/vim-solarized8'
+Plug 'arcticicestudio/nord-vim', { 'branch': 'develop' }
 
 call plug#end()
 
