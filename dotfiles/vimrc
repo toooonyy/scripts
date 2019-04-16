@@ -13,7 +13,7 @@ set encoding=utf8
 
 "UI
 set background=dark
-colorscheme solarized8_high
+colorscheme nord
 set termguicolors
 
 set showmatch
