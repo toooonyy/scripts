@@ -17,6 +17,7 @@ colorscheme nord
 set termguicolors
 
 set showmatch
+set cursorline
 set ruler 
 set number
 set relativenumber
@@ -67,3 +68,10 @@ func SetTitle()
         call setline(2,"# -* - coding: UTF-8 -* -")
     endif
 endfunc
+
+"Nord
+let g:nord_italic = 1
+let g:nord_underline = 1
+let g:nord_italic_comments = 1
+let g:nord_cursor_line_number_background = 1
+let g:nord_uniform_status_lines = 1
