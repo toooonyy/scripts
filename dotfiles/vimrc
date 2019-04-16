@@ -10,8 +10,6 @@ call plug#end()
 
 "Global
 set encoding=utf8
-syntax on
-filetype plugin indent on
 
 "UI
 set background=dark
