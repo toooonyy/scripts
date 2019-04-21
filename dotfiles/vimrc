@@ -5,6 +5,8 @@ Plug 'Yggdroot/indentLine'
 Plug 'w0rp/ale'
 Plug 'lifepillar/vim-solarized8'
 Plug 'arcticicestudio/nord-vim', { 'branch': 'develop' }
+Plug 'vim-airline/vim-airline'
+Plug 'lervag/vimtex'
 
 call plug#end()
 
