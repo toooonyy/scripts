@@ -7,11 +7,13 @@ Plug 'lifepillar/vim-solarized8'
 Plug 'arcticicestudio/nord-vim', { 'branch': 'develop' }
 Plug 'vim-airline/vim-airline'
 Plug 'lervag/vimtex'
+Plug 'tpope/vim-surround'
 
 call plug#end()
 
 "Global
 set encoding=utf8
+set bs=2
 
 "UI
 set background=dark
