@@ -1,13 +1,18 @@
 call plug#begin('~/.vim/plugged')
 
-Plug 'davidhalter/jedi-vim'
 Plug 'Yggdroot/indentLine'
 Plug 'w0rp/ale'
+Plug 'tpope/vim-surround'
+
+"Language
+Plug 'lervag/vimtex'
+Plug 'davidhalter/jedi-vim'
+Plug 'darfink/vim-plist'
+
+"Theme
+Plug 'vim-airline/vim-airline'
 Plug 'lifepillar/vim-solarized8'
 Plug 'arcticicestudio/nord-vim', { 'branch': 'develop' }
-Plug 'vim-airline/vim-airline'
-Plug 'lervag/vimtex'
-Plug 'tpope/vim-surround'
 
 call plug#end()
 
@@ -57,6 +62,20 @@ set nobackup
 set nowb
 set noswapfile
 
+"Create dir
+function s:MkNonExDir(file, buf)
+    if empty(getbufvar(a:buf, '&buftype')) && a:file!~#'\v^\w+\:\/'
+        let dir=fnamemodify(a:file, ':h')
+        if !isdirectory(dir)
+            call mkdir(dir, 'p')
+        endif
+    endif
+endfunction
+augroup BWCCreateDir
+    autocmd!
+    autocmd BufWritePre * :call s:MkNonExDir(expand('<afile>'), +expand('<abuf>'))
+augroup END
+
 "Miscellaneous
 set belloff=all
 
@@ -85,3 +104,23 @@ let g:nord_uniform_status_lines = 1
 
 "vimtex
 let g:tex_flavor = 'latex'
+
+"vim-plist
+function! s:ConvertBinaryPlist()
+  silent! execute '%d'
+  call plist#Read(1)
+  call plist#ReadPost()
+  set fileencoding=utf-8
+
+  autocmd! BufWriteCmd,FileWriteCmd <buffer>
+  autocmd BufWriteCmd,FileWriteCmd <buffer>
+        \ call plist#Write()
+endfunction
+autocmd BufRead *
+      \ if getline(1) =~# '^bplist' |
+      \   call s:ConvertBinaryPlist() |
+      \ endif
+autocmd BufNewFile *.plist
+      \ if !get(b:, 'plist_original_format') |
+      \   let b:plist_original_format = 'xml' |
+      \ endif
