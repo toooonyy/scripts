@@ -81,7 +81,6 @@ set belloff=all
 
 "jedi
 let g:jedi#completions_command = "<C-N>" 
-let g:indentLine_color_term = 15
 
 "ale
 let g:ale_linters = {'python':['flake8'], 'latex':['chktex']}
@@ -102,6 +101,7 @@ endfunc
 let g:nord_cursor_line_number_background = 1
 let g:nord_uniform_status_lines = 1
 
+let g:indentLine_concealcursor = 0
 "vimtex
 let g:tex_flavor = 'latex'
 
