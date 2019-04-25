@@ -101,7 +101,13 @@ endfunc
 let g:nord_cursor_line_number_background = 1
 let g:nord_uniform_status_lines = 1
 
+"indetLine
+let g:indentLine_color_term = 0
+let g:indentLine_bgcolor_term = "NONE"
+let g:indentLine_color_gui = '#4c566a'
+let g:indentLine_bgcolor_gui = 'NONE'
 let g:indentLine_concealcursor = 0
+
 "vimtex
 let g:tex_flavor = 'latex'
 
