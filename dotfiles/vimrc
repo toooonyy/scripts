@@ -11,7 +11,6 @@ Plug 'darfink/vim-plist'
 
 "Theme
 Plug 'vim-airline/vim-airline'
-Plug 'lifepillar/vim-solarized8'
 Plug 'arcticicestudio/nord-vim', { 'branch': 'develop' }
 
 call plug#end()
@@ -84,9 +83,12 @@ let g:jedi#completions_command = "<C-N>"
 
 "ale
 let g:ale_linters = {'python':['flake8'], 'latex':['chktex']}
-let g:ale_linters_explicit = 1
-let g:ale_statusline_format = ['⨉ %d', '⚠ %d', '⬥ ok']
 let g:ale_sign_column_always = 1
+let g:ale_echo_msg_error_str = 'E'
+let g:ale_echo_msg_warning_str = 'W'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+nmap <silent> <C-k> <Plug>(ale_previous_wrap)
+nmap <silent> <C-j> <Plug>(ale_next_wrap)
 
 "Python
 autocmd BufNewFile *.py exec ":call SetTitle()"
@@ -107,9 +109,12 @@ let g:indentLine_bgcolor_term = "NONE"
 let g:indentLine_color_gui = '#4c566a'
 let g:indentLine_bgcolor_gui = 'NONE'
 let g:indentLine_concealcursor = 0
+let g:indentLine_setConceal = 0
 
 "vimtex
 let g:tex_flavor = 'latex'
+set conceallevel=1
+let g:tex_conceal='abdmg'
 
 "vim-plist
 function! s:ConvertBinaryPlist()
