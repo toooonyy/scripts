@@ -8,6 +8,7 @@ Plug 'tpope/vim-surround'
 Plug 'lervag/vimtex'
 Plug 'davidhalter/jedi-vim'
 Plug 'darfink/vim-plist'
+Plug 'neoclide/coc.nvim', {'do': { -> coc#util#install()}}
 
 "Theme
 Plug 'vim-airline/vim-airline'
@@ -135,3 +136,6 @@ autocmd BufNewFile *.plist
       \ if !get(b:, 'plist_original_format') |
       \   let b:plist_original_format = 'xml' |
       \ endif
+
+"coc
+inoremap <silent><expr> <c-N> coc#refresh()
