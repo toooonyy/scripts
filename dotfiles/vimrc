@@ -139,3 +139,4 @@ autocmd BufNewFile *.plist
 
 "coc
 inoremap <silent><expr> <c-N> coc#refresh()
+set updatetime=300
