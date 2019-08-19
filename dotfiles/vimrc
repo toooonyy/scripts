@@ -103,6 +103,7 @@ let g:nord_uniform_status_lines = 1
 "vimtex
 let g:tex_flavor = 'latex'
 set conceallevel=2
+let g:tex_conceal='dgabm'
 "highlight Conceal cterm=NONE ctermfg=0 ctermbg=NONE
 highlight Conceal gui=NONE guifg=#bf616a guibg=NONE
 
